@@ -45,5 +45,17 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: EOF;
+stylesheet: stylerule* EOF;
+stylerule: selector OPEN_BRACE declaration CLOSE_BRACE;
+selector: LOWER_IDENT | ID_IDENT | CLASS_IDENT;
+declaration: (lengthDeclaration |colorDeclaration ) declaration*;
+lengthDeclaration: property COLON (PIXELSIZE | PERCENTAGE) SEMICOLON;
+property: 'width' | 'height';
+colorDeclaration: colorProperty COLON COLOR SEMICOLON;
+colorProperty: 'color' | 'background-color';
+expression: id ASSIGNMENT_OPERATOR value ;
+id: CAPITAL_IDENT;
+value: ;
+
+
 
