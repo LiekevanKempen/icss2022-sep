@@ -1,4 +1,4 @@
-import java.util.Stack;
+package nl.han.ica.datastructures;
 
 public class HANStack<T> implements IHANStack<T> {
 

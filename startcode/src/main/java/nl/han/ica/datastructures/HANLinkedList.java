@@ -1,3 +1,5 @@
+package nl.han.ica.datastructures;
+
 import java.util.Iterator;
 
 public class HANLinkedList<T> implements IHANLinkedList<T> {
@@ -97,9 +99,5 @@ public class HANLinkedList<T> implements IHANLinkedList<T> {
         return size;
     }
 
-    @Override
-    public Iterator iterator() {
-        return null;
-    }
 }
 
