@@ -45,17 +45,23 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: stylerule* EOF;
-stylerule: selector OPEN_BRACE declaration CLOSE_BRACE;
-selector: LOWER_IDENT | ID_IDENT | CLASS_IDENT;
-declaration: (lengthDeclaration |colorDeclaration ) declaration*;
-lengthDeclaration: property COLON (PIXELSIZE | PERCENTAGE) SEMICOLON;
-property: 'width' | 'height';
-colorDeclaration: colorProperty COLON COLOR SEMICOLON;
-colorProperty: 'color' | 'background-color';
-expression: id ASSIGNMENT_OPERATOR value ;
+stylesheet: (stylerule | expression)* EOF;
+stylerule: (tagSelector | idSelector | classSelector) OPEN_BRACE declaration* CLOSE_BRACE;
+idSelector: ID_IDENT;
+classSelector: CLASS_IDENT;
+tagSelector: LOWER_IDENT;
+declaration: property COLON (colorLiteral | pixelLiteral) SEMICOLON;
+//lengthDeclaration: property COLON (PIXELSIZE | PERCENTAGE) SEMICOLON;
+property: 'width' | 'height' | 'color' | 'background-color';
+//colorDeclaration: colorProperty COLON COLOR SEMICOLON;
+//colorProperty: 'color' | 'background-color';
+
+colorLiteral: COLOR;
+pixelLiteral: PIXELSIZE;
+
+expression: id ASSIGNMENT_OPERATOR value SEMICOLON;
 id: CAPITAL_IDENT;
-value: ;
+value: TRUE | FALSE | PIXELSIZE | PERCENTAGE | SCALAR | COLOR ;
 
 
 
