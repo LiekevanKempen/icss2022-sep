@@ -127,6 +127,18 @@ public class ASTListener extends ICSSBaseListener {
 	}
 
 	@Override
+	public void enterPercentageLiteral(ICSSParser.PercentageLiteralContext ctx) {
+		PercentageLiteral percentageLiteral = new PercentageLiteral(ctx.getText());
+		currentContainer.push(percentageLiteral);
+	}
+
+	@Override
+	public void exitPercentageLiteral(ICSSParser.PercentageLiteralContext ctx) {
+		PercentageLiteral percentageLiteral = (PercentageLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(percentageLiteral);
+	}
+
+	@Override
 	public void enterProperty(ICSSParser.PropertyContext ctx) {
 		PropertyName property = new PropertyName(ctx.getText());
 		currentContainer.push(property);
@@ -138,4 +150,52 @@ public class ASTListener extends ICSSBaseListener {
 		currentContainer.peek().addChild(property);
 	}
 
+	@Override
+	public void enterVariableAssignment(ICSSParser.VariableAssignmentContext ctx) {
+		VariableAssignment variableAssignment = new VariableAssignment();
+		currentContainer.push(variableAssignment);
+	}
+
+	@Override
+	public void exitVariableAssignment(ICSSParser.VariableAssignmentContext ctx) {
+		VariableAssignment variableAssignment = (VariableAssignment) currentContainer.pop();
+		currentContainer.peek().addChild(variableAssignment);
+	}
+
+	@Override
+	public void enterId(ICSSParser.IdContext ctx) {
+		VariableReference variableReference = new VariableReference(ctx.getText());
+		currentContainer.push(variableReference);
+
+	}
+
+	@Override
+	public void exitId(ICSSParser.IdContext ctx) {
+		VariableReference variableReference = (VariableReference) currentContainer.pop();
+		currentContainer.peek().addChild(variableReference);
+	}
+
+	@Override
+	public void enterBoolLiteral(ICSSParser.BoolLiteralContext ctx) {
+		BoolLiteral boolLiteral = new BoolLiteral(ctx.getText());
+		currentContainer.push(boolLiteral);
+	}
+
+	@Override
+	public void exitBoolLiteral(ICSSParser.BoolLiteralContext ctx) {
+		BoolLiteral boolLiteral = (BoolLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(boolLiteral);
+	}
+
+	@Override
+	public void enterScalarLiteral(ICSSParser.ScalarLiteralContext ctx) {
+		ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.getText());
+		currentContainer.push(scalarLiteral);
+	}
+
+	@Override
+	public void exitScalarLiteral(ICSSParser.ScalarLiteralContext ctx) {
+		ScalarLiteral scalarLiteral = (ScalarLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(scalarLiteral);
+	}
 }
