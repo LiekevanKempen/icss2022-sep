@@ -46,23 +46,35 @@ ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
 stylesheet: (stylerule | variableAssignment)* EOF;
-stylerule: (tagSelector | idSelector | classSelector) OPEN_BRACE declaration* CLOSE_BRACE;
+stylerule: (tagSelector | idSelector | classSelector) OPEN_BRACE (declaration | ifClause)* CLOSE_BRACE;
 idSelector: ID_IDENT;
 classSelector: CLASS_IDENT;
 tagSelector: LOWER_IDENT;
-declaration: property COLON (colorLiteral | pixelLiteral | percentageLiteral | id | expression) SEMICOLON;
-property: 'width' | 'height' | 'color' | 'background-color';
+declaration: property COLON (expression | colorLiteral | boolLiteral)  SEMICOLON;
 
+ifClause: IF BOX_BRACKET_OPEN (id | boolLiteral) BOX_BRACKET_CLOSE OPEN_BRACE (declaration | ifClause)* CLOSE_BRACE elseClause?;
+elseClause: ELSE OPEN_BRACE (declaration | ifClause)* CLOSE_BRACE;
+
+
+expression  : expression MUL expression #multiplyOperation
+            | expression MIN expression #subtractOperation
+            | expression PLUS expression #addOperation
+            | (pixelLiteral | percentageLiteral | scalarLiteral | id) #operationLiterals;
+
+
+
+som: som (KEER | DEEL) som | som (PLUS | MIN) som | DIGIT+;
+
+property: 'width' | 'height' | 'color' | 'background-color';
+variableAssignment: id ASSIGNMENT_OPERATOR (pixelLiteral | percentageLiteral | scalarLiteral | colorLiteral | boolLiteral) SEMICOLON;
 
 colorLiteral: COLOR;
 pixelLiteral: PIXELSIZE;
 percentageLiteral: PERCENTAGE;
-variableAssignment: id ASSIGNMENT_OPERATOR (colorLiteral | pixelLiteral | percentageLiteral | scalarLiteral | boolLiteral) SEMICOLON;
-expression: expression ( multiply | plus | min ) expression* | (pixelLiteral | percentageLiteral | scalarLiteral) | id;
 
-plus: PLUS;
-min: MIN;
-multiply: MUL;
+
+
+
 id: CAPITAL_IDENT;
 scalarLiteral: SCALAR ;
 boolLiteral: TRUE | FALSE;

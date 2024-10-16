@@ -1,5 +1,6 @@
 package nl.han.ica.icss.checker;
 
+import com.sun.prism.paint.Color;
 import nl.han.ica.datastructures.HANLinkedList;
 import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.*;
@@ -18,7 +19,7 @@ public class Checker {
 
 
     public void check(AST ast) {
-        //variableTypes = new HANLinkedList<>();
+        variableTypes = new HANLinkedList<>();
         checkStylesheet(ast.root);
     }
 
@@ -28,6 +29,7 @@ public class Checker {
                checkStylerule((Stylerule) node.getChildren().get(i));
            } else if (node.getChildren().get(i) instanceof VariableAssignment) {
                //checkVariableAssignement((VariableAssignment) node.getChildren().get(i));
+               //saveVariableAssignement((VariableAssignment) node.getChildren().get(i));
            }
 
 
@@ -35,7 +37,18 @@ public class Checker {
         }
     }
 
+//    private void saveVariableAssignement(VariableAssignment variableAssignment) {
+//        HashMap<String, ExpressionType> map = new HashMap<>();
+//
+//        if (variableAssignment.expression instanceof ColorLiteral ) {
+//            map.put(variableAssignment.name.name, ExpressionType.COLOR);
+//        }
+//    }
+//
 //    private void checkVariableAssignement(VariableAssignment variableAssignment) {
+//
+//
+//
 //
 //    }
 

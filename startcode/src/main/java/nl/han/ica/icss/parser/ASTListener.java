@@ -198,4 +198,65 @@ public class ASTListener extends ICSSBaseListener {
 		ScalarLiteral scalarLiteral = (ScalarLiteral) currentContainer.pop();
 		currentContainer.peek().addChild(scalarLiteral);
 	}
+
+	@Override
+	public void enterAddOperation(ICSSParser.AddOperationContext ctx) {
+		AddOperation addOperation = new AddOperation();
+		currentContainer.push(addOperation);
+	}
+
+	@Override
+	public void exitAddOperation(ICSSParser.AddOperationContext ctx) {
+		AddOperation addOperation = (AddOperation) currentContainer.pop();
+		currentContainer.peek().addChild(addOperation);
+	}
+
+	@Override
+	public void enterMultiplyOperation(ICSSParser.MultiplyOperationContext ctx) {
+		MultiplyOperation multiplyOperation = new MultiplyOperation();
+		currentContainer.push(multiplyOperation);
+	}
+
+	@Override
+	public void exitMultiplyOperation(ICSSParser.MultiplyOperationContext ctx) {
+		MultiplyOperation multiplyOperation = (MultiplyOperation) currentContainer.pop();
+		currentContainer.peek().addChild(multiplyOperation);
+	}
+
+	@Override
+	public void enterSubtractOperation(ICSSParser.SubtractOperationContext ctx) {
+		SubtractOperation subtractOperation = new SubtractOperation();
+		currentContainer.push(subtractOperation);
+	}
+
+	@Override
+	public void exitSubtractOperation(ICSSParser.SubtractOperationContext ctx) {
+		SubtractOperation subtractOperation = (SubtractOperation) currentContainer.pop();
+		currentContainer.peek().addChild(subtractOperation);
+	}
+
+	@Override
+	public void enterIfClause(ICSSParser.IfClauseContext ctx) {
+		IfClause ifClause = new IfClause();
+		currentContainer.push(ifClause);
+	}
+
+	@Override
+	public void exitIfClause(ICSSParser.IfClauseContext ctx) {
+		IfClause ifClause = (IfClause) currentContainer.pop();
+		currentContainer.peek().addChild(ifClause);
+	}
+
+	@Override
+	public void enterElseClause(ICSSParser.ElseClauseContext ctx) {
+		ElseClause elseClause = new ElseClause();
+		currentContainer.push(elseClause);
+	}
+
+	@Override
+	public void exitElseClause(ICSSParser.ElseClauseContext ctx) {
+		ElseClause elseClause = (ElseClause) currentContainer.pop();
+		currentContainer.peek().addChild(elseClause);
+	}
+
 }
