@@ -29,7 +29,7 @@ public class Checker {
                checkStylerule((Stylerule) node.getChildren().get(i));
            } else if (node.getChildren().get(i) instanceof VariableAssignment) {
                //checkVariableAssignement((VariableAssignment) node.getChildren().get(i));
-               //saveVariableAssignement((VariableAssignment) node.getChildren().get(i));
+               saveVariableAssignement((VariableAssignment) node.getChildren().get(i));
            }
 
 
@@ -37,20 +37,20 @@ public class Checker {
         }
     }
 
-//    private void saveVariableAssignement(VariableAssignment variableAssignment) {
-//        HashMap<String, ExpressionType> map = new HashMap<>();
-//
-//        if (variableAssignment.expression instanceof ColorLiteral ) {
-//            map.put(variableAssignment.name.name, ExpressionType.COLOR);
-//        }
-//    }
-//
-//    private void checkVariableAssignement(VariableAssignment variableAssignment) {
-//
-//
-//
-//
-//    }
+    private void saveVariableAssignement(VariableAssignment variableAssignment) {
+        HashMap<String, ExpressionType> map = new HashMap<>();
+
+        if (variableAssignment.expression instanceof ColorLiteral ) {
+            map.put(variableAssignment.name.name, ExpressionType.COLOR);
+        }
+    }
+
+    private void checkVariableAssignement(VariableAssignment variableAssignment) {
+
+
+
+
+    }
 
 
     private void checkStylerule(Stylerule rule) {
@@ -67,12 +67,12 @@ public class Checker {
         } else {
             switch (node.property.name) {
                 case "width":
-                    if (!(node.expression instanceof PixelLiteral) && !(node.expression instanceof PercentageLiteral)) {
+                    if (!(node.expression instanceof PixelLiteral) && !(node.expression instanceof PercentageLiteral) && !(node.expression instanceof Operation)) {
                         node.expression.setError("Property 'width' has invalid value");
                     }
                     break;
                 case "height":
-                    if (!(node.expression instanceof PixelLiteral) && !(node.expression instanceof PercentageLiteral)) {
+                    if (!(node.expression instanceof PixelLiteral) && !(node.expression instanceof PercentageLiteral) && !(node.expression instanceof Operation)) {
                         node.expression.setError("Property 'height' has invalid value");
                     }
                     break;

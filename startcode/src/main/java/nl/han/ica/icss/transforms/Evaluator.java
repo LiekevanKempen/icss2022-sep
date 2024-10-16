@@ -44,14 +44,20 @@ public class Evaluator implements Transform {
     }
 
     private void applyDeclaration(Declaration node) {
-//        node.expression = evaluateExpression(node.expression);
-//        for (ASTNode child : node.getChildren()) {
-//            System.out.println(child);
-//        }
+        node.expression = evaluateExpression(node.expression);
+
+
 
     }
 
+    private Expression evaluateExpression(Expression expression) {
+        if (expression instanceof MultiplyOperation) {
 
+            System.out.println(((MultiplyOperation) expression).lhs);
+            System.out.println(((MultiplyOperation) expression).rhs);
+        }
+        return null;
+    }
 
 
 }

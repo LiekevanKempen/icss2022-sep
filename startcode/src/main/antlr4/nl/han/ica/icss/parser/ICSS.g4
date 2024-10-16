@@ -61,10 +61,6 @@ expression  : expression MUL expression #multiplyOperation
             | expression PLUS expression #addOperation
             | (pixelLiteral | percentageLiteral | scalarLiteral | id) #operationLiterals;
 
-
-
-som: som (KEER | DEEL) som | som (PLUS | MIN) som | DIGIT+;
-
 property: 'width' | 'height' | 'color' | 'background-color';
 variableAssignment: id ASSIGNMENT_OPERATOR (pixelLiteral | percentageLiteral | scalarLiteral | colorLiteral | boolLiteral) SEMICOLON;
 
