@@ -9,6 +9,7 @@ import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 import nl.han.ica.icss.ast.types.ExpressionType;
 
+import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 
 
@@ -103,6 +104,27 @@ public class Checker {
             if (!checkVariableExistence((VariableReference) node.expression)) {
                 node.expression.setError("Variable does not exist");
             };
+            HashMap<String, ExpressionType> map = variableTypes.getFirst();
+            System.out.println(((VariableReference) node.expression).name);
+            switch (node.property.name) {
+                case "width":
+                    if (map.containsKey(((VariableReference) node.expression).name)) {
+                        System.out.println("test");
+
+                        //TODO: FINISH THE CODE
+                    }
+                    break;
+                case "height":
+
+                    break;
+                case "color":
+
+                    break;
+                case "background-color":
+
+                    break;
+
+            }
         } else if (node.expression instanceof AddOperation || node.expression instanceof SubtractOperation || node.expression instanceof MultiplyOperation) {
             for (int i = 0; i < node.expression.getChildren().size(); i++) {
                 if (node.expression.getChildren().get(i) instanceof VariableReference) {
@@ -121,7 +143,6 @@ public class Checker {
                 case "width":
                     if (!(node.expression instanceof PixelLiteral) && !(node.expression instanceof PercentageLiteral) && !(node.expression instanceof Operation)) {
                         node.expression.setError("Property 'width' has invalid value");
-                        // TODO: USE VARIABLETYPES
                     }
                     break;
                 case "height":
@@ -148,7 +169,7 @@ public class Checker {
             checkhs(operation.lhs, operation.rhs, operation);
 
         } else if (operation.rhs instanceof VariableReference) {
-            //TODO
+            checkhs(operation.rhs, operation.lhs, operation);
         }
         else if (operation instanceof MultiplyOperation) {
             if ((operation.lhs instanceof PercentageLiteral && (!(operation.rhs instanceof PercentageLiteral) && !(operation.rhs instanceof ScalarLiteral)))
