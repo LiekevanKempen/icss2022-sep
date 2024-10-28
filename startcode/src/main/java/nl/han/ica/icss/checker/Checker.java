@@ -145,14 +145,14 @@ public class Checker {
 
     private void CheckOperation(Operation operation) {
         if (operation.lhs instanceof VariableReference) {
-            //TODO
+            checkhs(operation.lhs, operation.rhs, operation);
+
         } else if (operation.rhs instanceof VariableReference) {
             //TODO
         }
         else if (operation instanceof MultiplyOperation) {
             if ((operation.lhs instanceof PercentageLiteral && (!(operation.rhs instanceof PercentageLiteral) && !(operation.rhs instanceof ScalarLiteral)))
-                    || (operation.lhs instanceof PixelLiteral && (!(operation.rhs instanceof PixelLiteral) && !(operation.rhs instanceof ScalarLiteral)))
-                    || (operation.lhs instanceof ScalarLiteral && (!(operation.rhs instanceof PixelLiteral) && !(operation.rhs instanceof PercentageLiteral)))) {
+                    || (operation.lhs instanceof PixelLiteral && (!(operation.rhs instanceof PixelLiteral) && !(operation.rhs instanceof ScalarLiteral)))) {
 
                 operation.lhs.setError("Operation operants aren't compatible");
             }
@@ -161,7 +161,29 @@ public class Checker {
                 operation.lhs.setError("Operation operants aren't compatible");
             }
         }
-        System.out.println(operation.lhs + " - " + operation.rhs);
+
+    }
+
+    private void checkhs(Expression node, Expression otherNode, Operation operation) {
+        for (int i = 0; i < variableTypes.getSize(); i++) {
+            HashMap<String, ExpressionType> map = variableTypes.get(i);
+            if (map.containsKey(((VariableReference) node).name)) {
+
+                if (operation instanceof MultiplyOperation) {
+                    if ((map.get(((VariableReference) node).name) == ExpressionType.PIXEL) && ((!(otherNode instanceof PixelLiteral)) && (!(otherNode instanceof ScalarLiteral)))) {
+                        node.setError("Operation operants aren't compatible");
+                    } else if ((map.get(((VariableReference) node).name) == ExpressionType.PERCENTAGE) && (!(otherNode instanceof PercentageLiteral)) && (!(otherNode instanceof ScalarLiteral))) {
+                        node.setError("Operation operants aren't compatible");
+                    }
+                } else {
+                    if ((map.get(((VariableReference) node).name) == ExpressionType.PIXEL) && (!(otherNode instanceof PixelLiteral))) {
+                        node.setError("Operation operants aren't compatible");
+                    } else if ((map.get(((VariableReference) node).name) == ExpressionType.PERCENTAGE) && (!(otherNode instanceof PercentageLiteral))) {
+                        node.setError("Operation operants aren't compatible");
+                    }
+                }
+            }
+        }
     }
 
     private Boolean checkVariableExistence(VariableReference expression) {
