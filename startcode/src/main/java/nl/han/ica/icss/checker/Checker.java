@@ -3,10 +3,7 @@ package nl.han.ica.icss.checker;
 import nl.han.ica.datastructures.HANLinkedList;
 import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.*;
-import nl.han.ica.icss.ast.literals.BoolLiteral;
-import nl.han.ica.icss.ast.literals.ColorLiteral;
-import nl.han.ica.icss.ast.literals.PercentageLiteral;
-import nl.han.ica.icss.ast.literals.PixelLiteral;
+import nl.han.ica.icss.ast.literals.*;
 import nl.han.ica.icss.ast.operations.AddOperation;
 import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
@@ -114,6 +111,9 @@ public class Checker {
                     }
                 }
             }
+            if (node.expression instanceof AddOperation || node.expression instanceof SubtractOperation || node.expression instanceof MultiplyOperation) {
+                CheckOperation((Operation) node.expression);
+            }
         }
 
         else {
@@ -121,6 +121,7 @@ public class Checker {
                 case "width":
                     if (!(node.expression instanceof PixelLiteral) && !(node.expression instanceof PercentageLiteral) && !(node.expression instanceof Operation)) {
                         node.expression.setError("Property 'width' has invalid value");
+                        // TODO: USE VARIABLETYPES
                     }
                     break;
                 case "height":
@@ -140,6 +141,27 @@ public class Checker {
                     break;
             }
         }
+    }
+
+    private void CheckOperation(Operation operation) {
+        if (operation.lhs instanceof VariableReference) {
+            //TODO
+        } else if (operation.rhs instanceof VariableReference) {
+            //TODO
+        }
+        else if (operation instanceof MultiplyOperation) {
+            if ((operation.lhs instanceof PercentageLiteral && (!(operation.rhs instanceof PercentageLiteral) && !(operation.rhs instanceof ScalarLiteral)))
+                    || (operation.lhs instanceof PixelLiteral && (!(operation.rhs instanceof PixelLiteral) && !(operation.rhs instanceof ScalarLiteral)))
+                    || (operation.lhs instanceof ScalarLiteral && (!(operation.rhs instanceof PixelLiteral) && !(operation.rhs instanceof PercentageLiteral)))) {
+
+                operation.lhs.setError("Operation operants aren't compatible");
+            }
+        } else {
+            if ((operation.lhs instanceof PercentageLiteral && !(operation.rhs instanceof PercentageLiteral)) || (operation.lhs instanceof PixelLiteral && !(operation.rhs instanceof PixelLiteral)) || operation.lhs instanceof ScalarLiteral) {
+                operation.lhs.setError("Operation operants aren't compatible");
+            }
+        }
+        System.out.println(operation.lhs + " - " + operation.rhs);
     }
 
     private Boolean checkVariableExistence(VariableReference expression) {
