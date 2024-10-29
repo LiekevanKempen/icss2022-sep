@@ -78,8 +78,8 @@ public class Checker {
                 checkElseClause((ElseClause) child);
             }
 
-
         }
+        variableTypes.removeFirst();
     }
 
     private void checkIfClause(IfClause node) {
@@ -96,9 +96,15 @@ public class Checker {
             }
         }
 
-
+        HashMap<String, ExpressionType> map = new HashMap<>();
         for (int i = 0; i < node.body.size(); i++) {
-            if (node.body.get(i) instanceof Declaration) {
+            if (node.body.get(i) instanceof VariableAssignment) {
+                if (variableTypes.getFirst() == map) {
+                    variableTypes.removeFirst();
+                }
+                map = saveVariableAssignement((VariableAssignment) node.body.get(i), map);
+                variableTypes.addFirst(map);
+            } else if (node.body.get(i) instanceof Declaration) {
                 checkDeclaration((Declaration) node.body.get(i));
             } else if (node.body.get(i) instanceof IfClause) {
                 checkIfClause((IfClause) node.body.get(i));
@@ -107,17 +113,25 @@ public class Checker {
             }
         }
 
-
+        variableTypes.removeFirst();
     }
 
     private void checkElseClause(ElseClause node) {
+        HashMap<String, ExpressionType> map = new HashMap<>();
         for (int i = 0; i < node.body.size(); i++) {
-            if (node.body.get(i) instanceof Declaration) {
+            if (node.body.get(i) instanceof VariableAssignment) {
+                if (variableTypes.getFirst() == map) {
+                    variableTypes.removeFirst();
+                }
+                map = saveVariableAssignement((VariableAssignment) node.body.get(i), map);
+                variableTypes.addFirst(map);
+            } else if (node.body.get(i) instanceof Declaration) {
                 checkDeclaration((Declaration) node.body.get(i));
             } else if (node.body.get(i) instanceof IfClause) {
                 checkIfClause((IfClause) node.body.get(i));
             }
         }
+        variableTypes.removeFirst();
     }
 
     private void checkDeclaration(Declaration node) {
