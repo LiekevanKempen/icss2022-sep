@@ -76,6 +76,16 @@ public class Checker {
             node.conditionalExpression.setError("Variable does not exist");
         }
 
+        for (int i = 0; i < variableTypes.getSize(); i++) {
+            HashMap<String, ExpressionType> map = variableTypes.get(i);
+            if (map.containsKey(((VariableReference) node.conditionalExpression).name)) {
+                if (map.get(((VariableReference) node.conditionalExpression).name) != ExpressionType.BOOL) {
+                    node.conditionalExpression.setError("Variable needs to be boolean");
+                }
+            }
+        }
+
+
         for (int i = 0; i < node.body.size(); i++) {
             if (node.body.get(i) instanceof Declaration) {
                 checkDeclaration((Declaration) node.body.get(i));
