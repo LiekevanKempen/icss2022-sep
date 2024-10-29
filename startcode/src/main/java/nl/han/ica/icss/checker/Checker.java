@@ -9,6 +9,7 @@ import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 import nl.han.ica.icss.ast.types.ExpressionType;
 
+import java.sql.SQLOutput;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 
@@ -51,15 +52,53 @@ public class Checker {
         }
         else if (variableAssignment.expression instanceof PixelLiteral ) {
             map.put(variableAssignment.name.name, ExpressionType.PIXEL);
-        } else if (variableAssignment.expression instanceof BoolLiteral) {
+        }
+        else if (variableAssignment.expression instanceof BoolLiteral) {
             map.put(variableAssignment.name.name, ExpressionType.BOOL);
         }
+        else if ( variableAssignment.expression instanceof VariableReference){
+            if (variableTypes.getSize() == 0) {
+                if (map.containsKey(((VariableReference) variableAssignment.expression).name)) {
+                    map.put(variableAssignment.name.name, (map.get(((VariableReference) variableAssignment.expression).name)) );
+                }
+            } else {
+            for (int i = 0; i < variableTypes.getSize(); i++) {
+                if (variableTypes.get(i).containsKey(((VariableReference) variableAssignment.expression).name)) {
+                    map.put(variableAssignment.name.name, (map.get(((VariableReference) variableAssignment.expression).name)) );
+                }
+
+            }
+            }
+        }
+        else if (variableAssignment.expression instanceof Operation) {
+            map.put(variableAssignment.name.name, findOperationValue((Operation) variableAssignment.expression));
+        }
         return map;
+    }
+
+    private ExpressionType findOperationValue(Operation operation) {
+        if (operation.lhs instanceof Operation) {
+            findOperationValue((Operation) operation.lhs);
+        } else if (operation.rhs instanceof Operation) {
+            findOperationValue((Operation) operation.rhs);
+        } else {
+            if (operation.lhs instanceof PixelLiteral || operation.rhs instanceof PixelLiteral) {
+                return ExpressionType.PIXEL;
+            } else if (operation.lhs instanceof PercentageLiteral || operation.rhs instanceof PercentageLiteral) {
+                return ExpressionType.PERCENTAGE;
+            } else if (operation.lhs instanceof ScalarLiteral || operation.rhs instanceof ScalarLiteral) {
+                return ExpressionType.SCALAR;
+            }
+
+
+        }
+        return ExpressionType.UNDEFINED;
     }
 
 
     private void checkStylerule(Stylerule rule) {
         HashMap<String, ExpressionType> map = new HashMap<>();
+        boolean variableCheck = false;
         for (ASTNode child: rule.getChildren()) {
             if (child instanceof VariableAssignment) {
                 if (variableTypes.getFirst() == map) {
@@ -67,6 +106,7 @@ public class Checker {
                 }
                 map = saveVariableAssignement((VariableAssignment) child, map);
                 variableTypes.addFirst(map);
+                variableCheck = true;
             }
             else if (child instanceof Declaration) {
                 checkDeclaration( (Declaration) child);
@@ -79,7 +119,10 @@ public class Checker {
             }
 
         }
-        variableTypes.removeFirst();
+        if (variableCheck) {
+            variableTypes.removeFirst();
+            variableCheck = false;
+        }
     }
 
     private void checkIfClause(IfClause node) {
@@ -97,6 +140,7 @@ public class Checker {
         }
 
         HashMap<String, ExpressionType> map = new HashMap<>();
+        boolean variableCheck = false;
         for (int i = 0; i < node.body.size(); i++) {
             if (node.body.get(i) instanceof VariableAssignment) {
                 if (variableTypes.getFirst() == map) {
@@ -104,6 +148,7 @@ public class Checker {
                 }
                 map = saveVariableAssignement((VariableAssignment) node.body.get(i), map);
                 variableTypes.addFirst(map);
+                variableCheck = true;
             } else if (node.body.get(i) instanceof Declaration) {
                 checkDeclaration((Declaration) node.body.get(i));
             } else if (node.body.get(i) instanceof IfClause) {
@@ -112,12 +157,14 @@ public class Checker {
                 checkElseClause((ElseClause) node.body.get(i));
             }
         }
-
+        if (variableCheck) {
         variableTypes.removeFirst();
+        }
     }
 
     private void checkElseClause(ElseClause node) {
         HashMap<String, ExpressionType> map = new HashMap<>();
+        boolean variableCheck = false;
         for (int i = 0; i < node.body.size(); i++) {
             if (node.body.get(i) instanceof VariableAssignment) {
                 if (variableTypes.getFirst() == map) {
@@ -125,13 +172,16 @@ public class Checker {
                 }
                 map = saveVariableAssignement((VariableAssignment) node.body.get(i), map);
                 variableTypes.addFirst(map);
+                variableCheck = true;
             } else if (node.body.get(i) instanceof Declaration) {
                 checkDeclaration((Declaration) node.body.get(i));
             } else if (node.body.get(i) instanceof IfClause) {
                 checkIfClause((IfClause) node.body.get(i));
             }
         }
+        if (variableCheck) {
         variableTypes.removeFirst();
+        }
     }
 
     private void checkDeclaration(Declaration node) {
@@ -166,7 +216,7 @@ public class Checker {
             for (int i = 0; i < node.expression.getChildren().size(); i++) {
                 if (node.expression.getChildren().get(i) instanceof VariableReference) {
                     if (!checkVariableExistence((VariableReference) node.expression.getChildren().get(i))) {
-                        node.expression.getChildren().get(i).setError("Variable does not exist");
+                        node.expression.getChildren().get(i).setError("Variable does not exist 1");
                     }
                 }
             }
@@ -204,19 +254,21 @@ public class Checker {
     private void CheckOperation(Operation operation) {
         if (operation.lhs instanceof VariableReference) {
             checkhs(operation.lhs, operation.rhs, operation);
-
         } else if (operation.rhs instanceof VariableReference) {
             checkhs(operation.rhs, operation.lhs, operation);
-        }
-        else if (operation instanceof MultiplyOperation) {
-            if ((operation.lhs instanceof PercentageLiteral && (!(operation.rhs instanceof PercentageLiteral) && !(operation.rhs instanceof ScalarLiteral)))
-                    || (operation.lhs instanceof PixelLiteral && (!(operation.rhs instanceof PixelLiteral) && !(operation.rhs instanceof ScalarLiteral)))) {
+        } else if (operation instanceof MultiplyOperation) {
+            if ((operation.lhs instanceof PercentageLiteral && (!(operation.rhs instanceof PercentageLiteral) && !(operation.rhs instanceof ScalarLiteral))  && (!(operation.rhs instanceof Operation)))
+                    || (operation.lhs instanceof PixelLiteral && (!(operation.rhs instanceof PixelLiteral) && !(operation.rhs instanceof ScalarLiteral))) && (!(operation.rhs instanceof Operation))) {
 
                 operation.lhs.setError("Operation operants aren't compatible");
             }
         } else {
-            if ((operation.lhs instanceof PercentageLiteral && !(operation.rhs instanceof PercentageLiteral)) || (operation.lhs instanceof PixelLiteral && !(operation.rhs instanceof PixelLiteral)) || operation.lhs instanceof ScalarLiteral) {
-                operation.lhs.setError("Operation operants aren't compatible");
+            System.out.println("HOOT HOOT: " + operation.lhs);
+            if (operation.lhs instanceof Operation) {
+                System.out.println("MORE HOOTS!");
+            }
+            if ((operation.lhs instanceof PercentageLiteral && !(operation.rhs instanceof PercentageLiteral)) || (operation.lhs instanceof PixelLiteral && !(operation.rhs instanceof PixelLiteral)) || (operation.lhs instanceof ScalarLiteral && !(operation.rhs instanceof ScalarLiteral)) ) {
+                operation.lhs.setError("Operation operants aren't compatible 2");
             }
         }
 
@@ -228,15 +280,15 @@ public class Checker {
             if (map.containsKey(((VariableReference) node).name)) {
 
                 if (operation instanceof MultiplyOperation) {
-                    if ((map.get(((VariableReference) node).name) == ExpressionType.PIXEL) && ((!(otherNode instanceof PixelLiteral)) && (!(otherNode instanceof ScalarLiteral)))) {
+                    if ((map.get(((VariableReference) node).name) == ExpressionType.PIXEL) && ((!(otherNode instanceof PixelLiteral)) && (!(otherNode instanceof ScalarLiteral)) && (!(otherNode instanceof Operation)))) {
                         node.setError("Operation operants aren't compatible");
-                    } else if ((map.get(((VariableReference) node).name) == ExpressionType.PERCENTAGE) && (!(otherNode instanceof PercentageLiteral)) && (!(otherNode instanceof ScalarLiteral))) {
+                    } else if ((map.get(((VariableReference) node).name) == ExpressionType.PERCENTAGE) && (!(otherNode instanceof PercentageLiteral)) && ((!(otherNode instanceof ScalarLiteral))) && (!(otherNode instanceof Operation))) {
                         node.setError("Operation operants aren't compatible");
                     }
                 } else {
-                    if ((map.get(((VariableReference) node).name) == ExpressionType.PIXEL) && (!(otherNode instanceof PixelLiteral))) {
+                    if ((map.get(((VariableReference) node).name) == ExpressionType.PIXEL) && ((!(otherNode instanceof PixelLiteral)) && (!(otherNode instanceof Operation)) && (!(otherNode instanceof VariableReference)))) {
                         node.setError("Operation operants aren't compatible");
-                    } else if ((map.get(((VariableReference) node).name) == ExpressionType.PERCENTAGE) && (!(otherNode instanceof PercentageLiteral))) {
+                    } else if ((map.get(((VariableReference) node).name) == ExpressionType.PERCENTAGE) && ((!(otherNode instanceof PercentageLiteral)) && (!(otherNode instanceof Operation))  && (!(otherNode instanceof VariableReference)))) {
                         node.setError("Operation operants aren't compatible");
                     }
                 }

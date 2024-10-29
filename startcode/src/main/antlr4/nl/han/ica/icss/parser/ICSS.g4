@@ -62,7 +62,7 @@ expression  : expression MUL expression #multiplyOperation
             | (pixelLiteral | percentageLiteral | scalarLiteral | id) #operationLiterals;
 
 property: 'width' | 'height' | 'color' | 'background-color';
-variableAssignment: id ASSIGNMENT_OPERATOR (pixelLiteral | percentageLiteral | scalarLiteral | colorLiteral | boolLiteral) SEMICOLON;
+variableAssignment: id ASSIGNMENT_OPERATOR (colorLiteral | boolLiteral| expression) SEMICOLON;
 
 colorLiteral: COLOR;
 pixelLiteral: PIXELSIZE;
