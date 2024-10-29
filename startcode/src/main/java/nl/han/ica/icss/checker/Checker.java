@@ -108,20 +108,20 @@ public class Checker {
             System.out.println(((VariableReference) node.expression).name);
             switch (node.property.name) {
                 case "width":
+                case "height":
                     if (map.containsKey(((VariableReference) node.expression).name)) {
-                        System.out.println("test");
-
-                        //TODO: FINISH THE CODE
+                        if ((map.get(((VariableReference) node.expression).name) != ExpressionType.PIXEL) && (map.get(((VariableReference) node.expression).name) != ExpressionType.PERCENTAGE)) {
+                            node.expression.setError("Variable has invalid value");
+                        }
                     }
                     break;
-                case "height":
-
-                    break;
                 case "color":
-
-                    break;
                 case "background-color":
-
+                    if (map.containsKey(((VariableReference) node.expression).name)) {
+                        if ((map.get(((VariableReference) node.expression).name) != ExpressionType.COLOR)) {
+                            node.expression.setError("Variable has invalid value");
+                        }
+                    }
                     break;
 
             }
