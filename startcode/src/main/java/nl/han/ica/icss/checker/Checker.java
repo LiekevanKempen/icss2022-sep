@@ -59,15 +59,26 @@ public class Checker {
 
 
     private void checkStylerule(Stylerule rule) {
+        HashMap<String, ExpressionType> map = new HashMap<>();
         for (ASTNode child: rule.getChildren()) {
-            if (child instanceof Declaration) {
+            if (child instanceof VariableAssignment) {
+                if (variableTypes.getFirst() == map) {
+                    variableTypes.removeFirst();
+                }
+                map = saveVariableAssignement((VariableAssignment) child, map);
+                variableTypes.addFirst(map);
+            }
+            else if (child instanceof Declaration) {
                 checkDeclaration( (Declaration) child);
             }
             else if (child instanceof IfClause) {
                 checkIfClause((IfClause) child);
-            } else if (child instanceof ElseClause) {
+            }
+            else if (child instanceof ElseClause) {
                 checkElseClause((ElseClause) child);
             }
+
+
         }
     }
 
@@ -114,8 +125,9 @@ public class Checker {
             if (!checkVariableExistence((VariableReference) node.expression)) {
                 node.expression.setError("Variable does not exist");
             };
-            HashMap<String, ExpressionType> map = variableTypes.getFirst();
-            System.out.println(((VariableReference) node.expression).name);
+            for (int i = 0; i < variableTypes.getSize(); i++) {
+
+            HashMap<String, ExpressionType> map = variableTypes.get(i);
             switch (node.property.name) {
                 case "width":
                 case "height":
@@ -133,6 +145,7 @@ public class Checker {
                         }
                     }
                     break;
+            }
 
             }
         } else if (node.expression instanceof AddOperation || node.expression instanceof SubtractOperation || node.expression instanceof MultiplyOperation) {
@@ -218,13 +231,13 @@ public class Checker {
     }
 
     private Boolean checkVariableExistence(VariableReference expression) {
-        HashMap<String, ExpressionType> map = variableTypes.getFirst();
+        for (int i = 0; i < variableTypes.getSize(); i++) {
+            HashMap<String, ExpressionType> map = variableTypes.get(i);
             if (map.containsKey(expression.name)) {
                 return true;
             }
-            else {
-                return false;
-            }
+        }
+        return false;
     }
 
 }

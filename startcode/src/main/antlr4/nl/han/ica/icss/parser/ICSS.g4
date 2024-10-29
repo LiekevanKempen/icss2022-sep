@@ -46,14 +46,14 @@ ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
 stylesheet: (stylerule | variableAssignment)* EOF;
-stylerule: (tagSelector | idSelector | classSelector) OPEN_BRACE (declaration | ifClause)* CLOSE_BRACE;
+stylerule: (tagSelector | idSelector | classSelector) OPEN_BRACE (declaration | ifClause | variableAssignment)* CLOSE_BRACE;
 idSelector: ID_IDENT;
 classSelector: CLASS_IDENT;
 tagSelector: LOWER_IDENT;
 declaration: property COLON (expression | colorLiteral | boolLiteral)  SEMICOLON;
 
-ifClause: IF BOX_BRACKET_OPEN (id | boolLiteral) BOX_BRACKET_CLOSE OPEN_BRACE (declaration | ifClause)* CLOSE_BRACE elseClause?;
-elseClause: ELSE OPEN_BRACE (declaration | ifClause)* CLOSE_BRACE;
+ifClause: IF BOX_BRACKET_OPEN (id | boolLiteral) BOX_BRACKET_CLOSE OPEN_BRACE (declaration | ifClause | variableAssignment)* CLOSE_BRACE elseClause?;
+elseClause: ELSE OPEN_BRACE (declaration | ifClause | variableAssignment)* CLOSE_BRACE;
 
 
 expression  : expression MUL expression #multiplyOperation
