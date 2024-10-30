@@ -263,12 +263,8 @@ public class Checker {
                 operation.lhs.setError("Operation operants aren't compatible");
             }
         } else {
-            System.out.println("HOOT HOOT: " + operation.lhs);
-            if (operation.lhs instanceof Operation) {
-                System.out.println("MORE HOOTS!");
-            }
             if ((operation.lhs instanceof PercentageLiteral && !(operation.rhs instanceof PercentageLiteral)) || (operation.lhs instanceof PixelLiteral && !(operation.rhs instanceof PixelLiteral)) || (operation.lhs instanceof ScalarLiteral && !(operation.rhs instanceof ScalarLiteral)) ) {
-                operation.lhs.setError("Operation operants aren't compatible 2");
+                operation.lhs.setError("Operation operants aren't compatible");
             }
         }
 
