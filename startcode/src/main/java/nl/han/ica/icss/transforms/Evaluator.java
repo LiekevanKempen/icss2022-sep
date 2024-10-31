@@ -29,13 +29,13 @@ public class Evaluator implements Transform {
         HashMap<String, Literal> map;
         for (int i = 0; i < node.getChildren().size(); i++) {
             if (node.getChildren().get(i) instanceof Stylerule) {
-            applyStylerule( (Stylerule) node.getChildren().get(i));
+                applyStylerule( (Stylerule) node.getChildren().get(i));
             } if (node.getChildren().get(i) instanceof VariableAssignment) {
                 if (variableValues.getSize() == 0) {
                     map = new HashMap<>();
                 } else {
                     map = variableValues.getFirst();
-                     variableValues.removeFirst();
+                    variableValues.removeFirst();
                 }
                 map = saveVariableAssignement((VariableAssignment) node.getChildren().get(i), map);
                 variableValues.addFirst(map);
@@ -45,7 +45,19 @@ public class Evaluator implements Transform {
     }
 
     private VariableAssignment applyVariableAssigment(VariableAssignment variableAssignment) {
-        return variableAssignment;
+        if (variableAssignment.expression instanceof VariableReference) {
+            for (int i = 0; i < variableValues.getSize(); i++) {
+                HashMap<String, Literal> map = variableValues.get(i);
+                if(map.containsKey(((VariableReference) variableAssignment.expression).name)) {
+                    variableAssignment.expression = map.get(((VariableReference) variableAssignment.expression).name);
+                }
+            }
+        } else if (variableAssignment.expression instanceof Operation) {
+            variableAssignment.expression = evaluateExpression((Operation) variableAssignment.expression);
+        } else {
+            return variableAssignment;
+        }
+        return null;
     }
 
     private HashMap<String, Literal> saveVariableAssignement(VariableAssignment variableAssignment, HashMap<String, Literal> map) {
@@ -85,7 +97,58 @@ public class Evaluator implements Transform {
     private void applyStylerule(Stylerule node) {
         for (ASTNode child : node.getChildren()) {
             if (child instanceof Declaration) {
-            applyDeclaration((Declaration) child);
+                applyDeclaration((Declaration) child);
+            } else if (child instanceof IfClause) {
+                applyIfClause((IfClause) child);
+            } else if (child instanceof ElseClause) {
+                applyElseClause((ElseClause) child);
+            }
+        }
+    }
+
+    private void applyIfClause(IfClause node) {
+        HashMap<String, Literal> map = new HashMap<>();
+        if (node.conditionalExpression instanceof VariableReference) {
+            node.conditionalExpression = evaluateExpression(node.conditionalExpression);
+        }
+        for (int i = 0; i < node.body.size(); i++) {
+            System.out.println(node.body.get(i));
+            if (node.body.get(i) instanceof VariableAssignment) {
+                System.out.println(((VariableAssignment) node.body.get(i)).expression);
+                System.out.println(evaluateExpression(((VariableAssignment) node.body.get(i)).expression));
+
+
+
+            }
+//                System.out.println("VARIABLE REFERENCE");
+//                if (variableValues.getFirst() == map) {
+//                    variableValues.removeFirst();
+//                }
+//                map = saveVariableAssignement((VariableAssignment) node.body.get(i), map);
+//                variableValues.addFirst(map);
+//                applyVariableAssigment((VariableAssignment) node.body.get(i));
+//
+//            } else if (node.body.get(i) instanceof Declaration) {
+//                applyDeclaration((Declaration) node.body.get(i));
+//            } else if (node.body.get(i) instanceof IfClause) {
+//                applyIfClause((IfClause) node.body.get(i));
+//            } else if (node.body.get(i) instanceof ElseClause) {
+//                System.out.println("ELSE");
+//                applyElseClause((ElseClause) node.body.get(i));
+//            }
+        }
+
+    }
+
+
+    private void applyElseClause(ElseClause node) {
+        for (int i = 0; i < node.body.size(); i++) {
+            if (node.body.get(i) instanceof VariableReference) {
+                System.out.println("TEST");
+            } else if (node.body.get(i) instanceof Declaration) {
+                applyDeclaration((Declaration) node.body.get(i));
+            } else if (node.body.get(i) instanceof IfClause) {
+                applyIfClause((IfClause) node.body.get(i));
             }
         }
     }
@@ -93,9 +156,8 @@ public class Evaluator implements Transform {
     private void applyDeclaration(Declaration node) {
         node.expression = evaluateExpression(node.expression);
 
-
-
     }
+
 
     private Literal evaluateExpression(Expression expression) {
         if (expression instanceof AddOperation) {
@@ -141,8 +203,6 @@ public class Evaluator implements Transform {
                 if(map.containsKey(((VariableReference) expression).name)) {
                     return map.get(((VariableReference) expression).name);
                 }
-
-
             }
         }
         return null;
