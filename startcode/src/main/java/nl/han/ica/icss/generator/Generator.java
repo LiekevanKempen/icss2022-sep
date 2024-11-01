@@ -27,7 +27,9 @@ public class Generator {
 		String result = "";
 		result = stylerule.selectors.get(0) + " {\n";
 		for (int i = 0; i < stylerule.body.size(); i++) {
-			result += "  " + generateDeclaration( (Declaration) stylerule.body.get(i)) ;
+			if (stylerule.body.get(i) instanceof Declaration) {
+			result += "  " + generateDeclaration((Declaration) stylerule.body.get(i)) ;
+			}
 		}
 		result += "} \n";
 		return result;

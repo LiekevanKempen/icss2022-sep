@@ -1,6 +1,5 @@
 package nl.han.ica.icss.checker;
 
-import com.google.errorprone.annotations.Var;
 import nl.han.ica.datastructures.HANLinkedList;
 import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.*;
@@ -10,8 +9,6 @@ import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 import nl.han.ica.icss.ast.types.ExpressionType;
 
-import java.sql.SQLOutput;
-import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 
 
@@ -37,6 +34,9 @@ public class Checker {
                } else {
                    map = variableTypes.getFirst();
                    variableTypes.removeFirst();
+               }
+               if (((VariableAssignment) node.getChildren().get(i)).expression instanceof Operation) {
+                   checkOperation((Operation) ((VariableAssignment) node.getChildren().get(i)).expression);
                }
                map = saveVariableAssignement((VariableAssignment) node.getChildren().get(i), map);
                variableTypes.addFirst(map);
@@ -83,9 +83,9 @@ public class Checker {
 
     private ExpressionType findOperationValue(Operation operation) {
         if (operation.lhs instanceof Operation) {
-            findOperationValue((Operation) operation.lhs);
+            return findOperationValue((Operation) operation.lhs);
         } else if (operation.rhs instanceof Operation) {
-            findOperationValue((Operation) operation.rhs);
+            return findOperationValue((Operation) operation.rhs);
         } else {
             if (operation.lhs instanceof PixelLiteral || operation.rhs instanceof PixelLiteral) {
                 return ExpressionType.PIXEL;
@@ -93,11 +93,12 @@ public class Checker {
                 return ExpressionType.PERCENTAGE;
             } else if (operation.lhs instanceof ScalarLiteral || operation.rhs instanceof ScalarLiteral) {
                 return ExpressionType.SCALAR;
+            } else {
+                return ExpressionType.UNDEFINED;
             }
 
 
         }
-        return ExpressionType.UNDEFINED;
     }
 
 
@@ -205,6 +206,7 @@ public class Checker {
                 case "width":
                 case "height":
                     if (map.containsKey(((VariableReference) node.expression).name)) {
+
                         if ((map.get(((VariableReference) node.expression).name) != ExpressionType.PIXEL) && (map.get(((VariableReference) node.expression).name) != ExpressionType.PERCENTAGE)) {
                             node.expression.setError("Variable has invalid value");
                         }
@@ -225,12 +227,12 @@ public class Checker {
             for (int i = 0; i < node.expression.getChildren().size(); i++) {
                 if (node.expression.getChildren().get(i) instanceof VariableReference) {
                     if (!checkVariableExistence((VariableReference) node.expression.getChildren().get(i))) {
-                        node.expression.getChildren().get(i).setError("Variable does not exist 1");
+                        node.expression.getChildren().get(i).setError("Variable does not exist");
                     }
                 }
             }
             if (node.expression instanceof AddOperation || node.expression instanceof SubtractOperation || node.expression instanceof MultiplyOperation) {
-                CheckOperation((Operation) node.expression);
+                checkOperation((Operation) node.expression);
             }
         }
 
@@ -260,19 +262,19 @@ public class Checker {
         }
     }
 
-    private void CheckOperation(Operation operation) {
+    private void checkOperation(Operation operation) {
         if (operation.lhs instanceof VariableReference) {
             checkhs(operation.lhs, operation.rhs, operation);
         } else if (operation.rhs instanceof VariableReference) {
             checkhs(operation.rhs, operation.lhs, operation);
         } else if (operation instanceof MultiplyOperation) {
-            if ((operation.lhs instanceof PercentageLiteral && (!(operation.rhs instanceof PercentageLiteral) && !(operation.rhs instanceof ScalarLiteral))  && (!(operation.rhs instanceof Operation)))
-                    || (operation.lhs instanceof PixelLiteral && (!(operation.rhs instanceof PixelLiteral) && !(operation.rhs instanceof ScalarLiteral))) && (!(operation.rhs instanceof Operation))) {
-
+            System.out.println("IN CHECK OPERATION");
+            if ((operation.lhs instanceof PercentageLiteral && (!(operation.rhs instanceof ScalarLiteral))  && (!(operation.rhs instanceof Operation)))
+                    || (operation.lhs instanceof PixelLiteral && (!(operation.rhs instanceof ScalarLiteral))) && (!(operation.rhs instanceof Operation))) {
                 operation.lhs.setError("Operation operants aren't compatible");
             }
         } else {
-            if ((operation.lhs instanceof PercentageLiteral && !(operation.rhs instanceof PercentageLiteral)) || (operation.lhs instanceof PixelLiteral && !(operation.rhs instanceof PixelLiteral)) || (operation.lhs instanceof ScalarLiteral && !(operation.rhs instanceof ScalarLiteral)) ) {
+            if ((operation.lhs instanceof PercentageLiteral && (!(operation.rhs instanceof PercentageLiteral)) && (!(operation.rhs instanceof Operation))) || (operation.lhs instanceof PixelLiteral && (!(operation.rhs instanceof PixelLiteral)) && (!(operation.rhs instanceof Operation))) || (operation.lhs instanceof ScalarLiteral && !((operation.rhs instanceof ScalarLiteral)) && (!(operation.rhs instanceof Operation))) ) {
                 operation.lhs.setError("Operation operants aren't compatible");
             }
         }

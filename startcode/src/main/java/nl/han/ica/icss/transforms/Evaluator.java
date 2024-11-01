@@ -8,6 +8,7 @@ import nl.han.ica.icss.ast.operations.AddOperation;
 import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 import nl.han.ica.icss.ast.types.ExpressionType;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -103,7 +104,8 @@ public class Evaluator implements Transform {
                 if (((IfClause) child).conditionalExpression instanceof VariableReference) {
                     ((IfClause) child).conditionalExpression = evaluateExpression((VariableReference) ((IfClause) child).conditionalExpression);
                 }
-                boolean conditionalExpression = ((BoolLiteral) ((IfClause) child).conditionalExpression).value ;
+                boolean conditionalExpression = ((BoolLiteral) ((IfClause) child).conditionalExpression).value;
+
 
                 if (conditionalExpression) {
                     applyIfClause((IfClause) child);
@@ -133,7 +135,6 @@ public class Evaluator implements Transform {
         if (node.conditionalExpression instanceof VariableReference) {
             node.conditionalExpression = evaluateExpression(node.conditionalExpression);
         }
-
         if (((BoolLiteral) node.conditionalExpression).value){
             for (int i = 0; i < node.body.size(); i++) {
                 if (node.body.get(i) instanceof VariableAssignment) {
@@ -145,14 +146,18 @@ public class Evaluator implements Transform {
                         ((IfClause) node.body.get(i)).conditionalExpression = evaluateExpression((VariableReference) ((IfClause) node.body.get(i)).conditionalExpression);
                     }
                     boolean conditionalExpression = ((BoolLiteral) ((IfClause) node.body.get(i)).conditionalExpression).value ;
-
                     if (conditionalExpression) {
                         applyIfClause((IfClause) node.body.get(i));
                         node.body = ((IfClause) node.body.get(i)).body;
                     } else {
                         if( ((IfClause) node.body.get(i)).elseClause != null ) {
                             ((IfClause) node.body.get(i)).body = ((IfClause) node.body.get(i)).elseClause.body;
-                            node.body = ((IfClause) node.body.get(i)).body;
+                            ArrayList<ASTNode> newBody = new ArrayList<>();
+                            newBody = ((IfClause) node.body.get(i)).body;
+                            for (int j = 0; j < i; j++) {
+                                newBody.add(node.body.get(j));
+                            }
+                            node.body = newBody;
                         } else {
                             node.body.remove(node.body.get(i));
                         }
@@ -202,15 +207,11 @@ public class Evaluator implements Transform {
                 return new ScalarLiteral(((ScalarLiteral) evaluateExpression(((SubtractOperation) expression).lhs)).value - ((ScalarLiteral) evaluateExpression(((SubtractOperation) expression).rhs)).value);
             }
         } else if (expression instanceof MultiplyOperation) {
-            if (evaluateExpression(((MultiplyOperation) expression).lhs) instanceof PixelLiteral && evaluateExpression(((MultiplyOperation) expression).rhs) instanceof PixelLiteral) {
-                return new PixelLiteral(((PixelLiteral) evaluateExpression(((MultiplyOperation) expression).lhs)).value * ((PixelLiteral) evaluateExpression(((MultiplyOperation) expression).rhs)).value);
-            } else if (evaluateExpression(((MultiplyOperation) expression).lhs) instanceof PixelLiteral && evaluateExpression(((MultiplyOperation) expression).rhs) instanceof ScalarLiteral) {
+            if (evaluateExpression(((MultiplyOperation) expression).lhs) instanceof PixelLiteral && evaluateExpression(((MultiplyOperation) expression).rhs) instanceof ScalarLiteral) {
                 return new PixelLiteral(((PixelLiteral) evaluateExpression(((MultiplyOperation) expression).lhs)).value * ((ScalarLiteral) evaluateExpression(((MultiplyOperation) expression).rhs)).value);
             } else if (evaluateExpression(((MultiplyOperation) expression).lhs) instanceof ScalarLiteral && evaluateExpression(((MultiplyOperation) expression).rhs) instanceof PixelLiteral) {
                 return new PixelLiteral(((ScalarLiteral) evaluateExpression(((MultiplyOperation) expression).lhs)).value * ((PixelLiteral) evaluateExpression(((MultiplyOperation) expression).rhs)).value);
 
-            } else if (evaluateExpression(((MultiplyOperation) expression).lhs) instanceof PercentageLiteral && evaluateExpression(((MultiplyOperation) expression).rhs) instanceof PercentageLiteral) {
-                return new PercentageLiteral(((PercentageLiteral) evaluateExpression(((MultiplyOperation) expression).lhs)).value * ((PercentageLiteral) evaluateExpression(((MultiplyOperation) expression).rhs)).value);
             } else if (evaluateExpression(((MultiplyOperation) expression).lhs) instanceof PercentageLiteral && evaluateExpression(((MultiplyOperation) expression).rhs) instanceof ScalarLiteral) {
                 return new PercentageLiteral(((PercentageLiteral) evaluateExpression(((MultiplyOperation) expression).lhs)).value * ((ScalarLiteral) evaluateExpression(((MultiplyOperation) expression).rhs)).value);
             } else if (evaluateExpression(((MultiplyOperation) expression).lhs) instanceof ScalarLiteral && evaluateExpression(((MultiplyOperation) expression).rhs) instanceof PercentageLiteral) {
