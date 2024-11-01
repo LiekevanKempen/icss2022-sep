@@ -1,5 +1,6 @@
 package nl.han.ica.icss.checker;
 
+import com.google.errorprone.annotations.Var;
 import nl.han.ica.datastructures.HANLinkedList;
 import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.*;
@@ -130,18 +131,22 @@ public class Checker {
     }
 
     private void checkIfClause(IfClause node) {
-        if (!checkVariableExistence((VariableReference) node.conditionalExpression)) {
-            node.conditionalExpression.setError("Variable does not exist");
-        }
-
-        for (int i = 0; i < variableTypes.getSize(); i++) {
-            HashMap<String, ExpressionType> map = variableTypes.get(i);
-            if (map.containsKey(((VariableReference) node.conditionalExpression).name)) {
-                if (map.get(((VariableReference) node.conditionalExpression).name) != ExpressionType.BOOL) {
-                    node.conditionalExpression.setError("Variable needs to be boolean");
+        if (node.conditionalExpression instanceof VariableReference) {
+            if (!checkVariableExistence((VariableReference) node.conditionalExpression)) {
+                node.conditionalExpression.setError("Variable does not exist");
+            }
+            for (int i = 0; i < variableTypes.getSize(); i++) {
+                HashMap<String, ExpressionType> map = variableTypes.get(i);
+                if (map.containsKey(((VariableReference) node.conditionalExpression).name)) {
+                    if (map.get(((VariableReference) node.conditionalExpression).name) != ExpressionType.BOOL) {
+                        node.conditionalExpression.setError("Variable needs to be boolean");
+                    }
                 }
             }
         }
+
+
+
 
         HashMap<String, ExpressionType> map = new HashMap<>();
         boolean variableCheck = false;

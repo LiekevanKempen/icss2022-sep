@@ -9,6 +9,7 @@ import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 import nl.han.ica.icss.ast.types.ExpressionType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Evaluator implements Transform {
@@ -99,7 +100,24 @@ public class Evaluator implements Transform {
             if (child instanceof Declaration) {
                 applyDeclaration((Declaration) child);
             } else if (child instanceof IfClause) {
-                applyIfClause((IfClause) child);
+                if (((IfClause) child).conditionalExpression instanceof VariableReference) {
+                    ((IfClause) child).conditionalExpression = evaluateExpression((VariableReference) ((IfClause) child).conditionalExpression);
+                }
+                boolean conditionalExpression = ((BoolLiteral) ((IfClause) child).conditionalExpression).value ;
+
+                if (conditionalExpression) {
+                    applyIfClause((IfClause) child);
+                    node.body = ((IfClause) child).body;
+                } else {
+                    if( ((IfClause) child).elseClause != null ) {
+                        ((IfClause) child).body = ((IfClause) child).elseClause.body;
+                        node.body = ((IfClause) child).body;
+                    } else {
+                        node.body.remove(child);
+                    }
+                }
+
+
             } else if (child instanceof ElseClause) {
                 applyElseClause((ElseClause) child);
             }
@@ -107,21 +125,23 @@ public class Evaluator implements Transform {
     }
 
     private void applyIfClause(IfClause node) {
-        HashMap<String, Literal> map = new HashMap<>();
         if (node.conditionalExpression instanceof VariableReference) {
             node.conditionalExpression = evaluateExpression(node.conditionalExpression);
         }
-        for (int i = 0; i < node.body.size(); i++) {
-            if (node.body.get(i) instanceof VariableAssignment) {
-                ((VariableAssignment) node.body.get(i)).expression = evaluateExpression(((VariableAssignment) node.body.get(i)).expression);
-            } else if (node.body.get(i) instanceof Declaration) {
-                applyDeclaration((Declaration) node.body.get(i));
-            } else if (node.body.get(i) instanceof IfClause) {
-                applyIfClause((IfClause) node.body.get(i));
-            } else if (node.body.get(i) instanceof ElseClause) {
-                applyElseClause((ElseClause) node.body.get(i));
+
+        if (((BoolLiteral) node.conditionalExpression).value){
+            for (int i = 0; i < node.body.size(); i++) {
+                if (node.body.get(i) instanceof VariableAssignment) {
+                    ((VariableAssignment) node.body.get(i)).expression = evaluateExpression(((VariableAssignment) node.body.get(i)).expression);
+                } else if (node.body.get(i) instanceof Declaration) {
+                    applyDeclaration((Declaration) node.body.get(i));
+                } else if (node.body.get(i) instanceof IfClause) {
+                    applyIfClause((IfClause) node.body.get(i));
+                } else if (node.body.get(i) instanceof ElseClause) {
+                    applyElseClause((ElseClause) node.body.get(i));
+                }
+                applyElseClause(node.elseClause);
             }
-            applyElseClause(node.elseClause);
         }
 
     }
