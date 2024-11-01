@@ -107,19 +107,24 @@ public class Evaluator implements Transform {
 
                 if (conditionalExpression) {
                     applyIfClause((IfClause) child);
-                    node.body = ((IfClause) child).body;
+                int childNr = -1;
+                    for (int i = 0; i < node.body.size(); i++) {
+                        if (node.body.get(i) == child) {
+                            childNr = i;
+                        }
+                    }
+
+                    for (int i = 0; i < ((IfClause) child).body.size(); i++) {
+                        node.body.add(childNr,((IfClause) child).body.get(i));
+                    }
+                    node.body.remove(child);
                 } else {
                     if( ((IfClause) child).elseClause != null ) {
                         ((IfClause) child).body = ((IfClause) child).elseClause.body;
-                        node.body = ((IfClause) child).body;
                     } else {
                         node.body.remove(child);
                     }
                 }
-
-
-            } else if (child instanceof ElseClause) {
-                applyElseClause((ElseClause) child);
             }
         }
     }
@@ -136,11 +141,25 @@ public class Evaluator implements Transform {
                 } else if (node.body.get(i) instanceof Declaration) {
                     applyDeclaration((Declaration) node.body.get(i));
                 } else if (node.body.get(i) instanceof IfClause) {
-                    applyIfClause((IfClause) node.body.get(i));
+                    if (((IfClause) node.body.get(i)).conditionalExpression instanceof VariableReference) {
+                        ((IfClause) node.body.get(i)).conditionalExpression = evaluateExpression((VariableReference) ((IfClause) node.body.get(i)).conditionalExpression);
+                    }
+                    boolean conditionalExpression = ((BoolLiteral) ((IfClause) node.body.get(i)).conditionalExpression).value ;
+
+                    if (conditionalExpression) {
+                        applyIfClause((IfClause) node.body.get(i));
+                        node.body = ((IfClause) node.body.get(i)).body;
+                    } else {
+                        if( ((IfClause) node.body.get(i)).elseClause != null ) {
+                            ((IfClause) node.body.get(i)).body = ((IfClause) node.body.get(i)).elseClause.body;
+                            node.body = ((IfClause) node.body.get(i)).body;
+                        } else {
+                            node.body.remove(node.body.get(i));
+                        }
+                    }
                 } else if (node.body.get(i) instanceof ElseClause) {
                     applyElseClause((ElseClause) node.body.get(i));
                 }
-                applyElseClause(node.elseClause);
             }
         }
 
