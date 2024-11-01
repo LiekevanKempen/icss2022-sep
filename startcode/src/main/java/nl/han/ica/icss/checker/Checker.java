@@ -60,11 +60,15 @@ public class Checker {
             if (variableTypes.getSize() == 0) {
                 if (map.containsKey(((VariableReference) variableAssignment.expression).name)) {
                     map.put(variableAssignment.name.name, (map.get(((VariableReference) variableAssignment.expression).name)) );
+                } else {
+                    variableAssignment.expression.setError("Variable " + ((VariableReference) variableAssignment.expression).name + " Does not exist") ;
                 }
             } else {
             for (int i = 0; i < variableTypes.getSize(); i++) {
                 if (variableTypes.get(i).containsKey(((VariableReference) variableAssignment.expression).name)) {
-                    map.put(variableAssignment.name.name, (map.get(((VariableReference) variableAssignment.expression).name)) );
+                    map.put(variableAssignment.name.name, (map.get(((VariableReference) variableAssignment.expression).name)));
+                } else {
+                    variableAssignment.expression.setError("Variable " + ((VariableReference) variableAssignment.expression).name + " Does not exist") ;
                 }
 
             }

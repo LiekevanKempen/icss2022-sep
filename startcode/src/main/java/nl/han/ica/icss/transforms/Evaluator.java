@@ -112,30 +112,16 @@ public class Evaluator implements Transform {
             node.conditionalExpression = evaluateExpression(node.conditionalExpression);
         }
         for (int i = 0; i < node.body.size(); i++) {
-            System.out.println(node.body.get(i));
             if (node.body.get(i) instanceof VariableAssignment) {
-                System.out.println(((VariableAssignment) node.body.get(i)).expression);
-                System.out.println(evaluateExpression(((VariableAssignment) node.body.get(i)).expression));
-
-
-
+                ((VariableAssignment) node.body.get(i)).expression = evaluateExpression(((VariableAssignment) node.body.get(i)).expression);
+            } else if (node.body.get(i) instanceof Declaration) {
+                applyDeclaration((Declaration) node.body.get(i));
+            } else if (node.body.get(i) instanceof IfClause) {
+                applyIfClause((IfClause) node.body.get(i));
+            } else if (node.body.get(i) instanceof ElseClause) {
+                applyElseClause((ElseClause) node.body.get(i));
             }
-//                System.out.println("VARIABLE REFERENCE");
-//                if (variableValues.getFirst() == map) {
-//                    variableValues.removeFirst();
-//                }
-//                map = saveVariableAssignement((VariableAssignment) node.body.get(i), map);
-//                variableValues.addFirst(map);
-//                applyVariableAssigment((VariableAssignment) node.body.get(i));
-//
-//            } else if (node.body.get(i) instanceof Declaration) {
-//                applyDeclaration((Declaration) node.body.get(i));
-//            } else if (node.body.get(i) instanceof IfClause) {
-//                applyIfClause((IfClause) node.body.get(i));
-//            } else if (node.body.get(i) instanceof ElseClause) {
-//                System.out.println("ELSE");
-//                applyElseClause((ElseClause) node.body.get(i));
-//            }
+            applyElseClause(node.elseClause);
         }
 
     }
@@ -143,8 +129,8 @@ public class Evaluator implements Transform {
 
     private void applyElseClause(ElseClause node) {
         for (int i = 0; i < node.body.size(); i++) {
-            if (node.body.get(i) instanceof VariableReference) {
-                System.out.println("TEST");
+            if (node.body.get(i) instanceof VariableAssignment) {
+                ((VariableAssignment) node.body.get(i)).expression = evaluateExpression(((VariableAssignment) node.body.get(i)).expression);
             } else if (node.body.get(i) instanceof Declaration) {
                 applyDeclaration((Declaration) node.body.get(i));
             } else if (node.body.get(i) instanceof IfClause) {
